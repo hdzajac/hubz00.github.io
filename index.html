@@ -48,12 +48,14 @@ text {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
     integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
     crossorigin=""/>
-
+    <script src="//d3js.org/d3.v3.min.js"></script>
+    <script src="//d3js.org/topojson.v1.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
     integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
     crossorigin=""></script>
 
-
+    <script src="//d3js.org/d3.v3.min.js"></script>
+    <script src="//d3js.org/topojson.v1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"> </script>
 <script src = "https://d3js.org/d3-request.v1.min.js"></script>
 <script
@@ -68,10 +70,14 @@ text {
 
 <script src="https://d3js.org/d3-array.v1.min.js"></script>
 <script src="https://d3js.org/d3-geo.v1.min.js"></script>
+
 <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
  <link href="https://d3-geomap.github.io//d3-geomap/css/d3.geomap.css" rel="stylesheet">
     <script src="https://d3-geomap.github.io//d3-geomap/vendor/d3.geomap.dependencies.min.js"></script>
     <script src="https://d3-geomap.github.io//d3-geomap/js/d3.geomap.min.js"></script>
+    <link href="/d3-geomap/css/d3.geomap.css" rel="stylesheet">
+    <script src="/d3-geomap/vendor/d3.geomap.dependencies.min.js"></script>
+    <script src="/d3-geomap/js/d3.geomap.min.js"></script>
 </head>
 <body >
     <h3>Visualizing Graphs - Flights from Denmark</h3>
@@ -80,9 +86,11 @@ text {
 	<div> Click the second button to see the improved version of the visualisation solving the scalability issues. </div> 
     <button id="bad">First version </button>
     <button id="good">Improved version</button>
+    <button id="reset", style= "visibility:hidden">Reset Edges</button>
+
   </div>
   <div id="mapid" style="display: none"></div>
-<svg width="960" height="800"></svg>
+<svg width="960" height="960  "></svg>
   <script >
 
 $("#bad").on("click", function(e){
@@ -231,19 +239,25 @@ $("#bad").on("click", function(e){
 
 
 $("#good").on("click", function(e){
+  document.getElementById("reset").style.visibility="visible";
+
   $(e.target).hide();
   $("#mapid").show();
 
 
 var svg = d3.select("svg");
+
 var plot = svg.append("g").attr("id", "plot");
+
 var radius = {min: 0.5, max: 7};
 
+var scale0 = (width - 1) / 2 / Math.PI;
 var width  = +svg.attr("width");
 var height = +svg.attr("height");
 
-    var offsetL = document.getElementById('mapid').offsetLeft+10;
-    var offsetT = document.getElementById('mapid').offsetTop+80;
+
+var offsetL = document.getElementById('mapid').offsetLeft+10;  
+var offsetT = document.getElementById('mapid').offsetTop+80;
 
 
 
@@ -268,6 +282,7 @@ var routes = [];
   var center = [25, 72.6];
   var scale = 620;
   var  projection = d3.geoMercator().scale(scale).translate([width / 2, 0]).center(center);
+
 
 
     var tooltip = d3.select("#mapid")
@@ -402,13 +417,12 @@ var routes = [];
     });   
   }
 
+
+
 function drawMap(error, map) {
-
-
   // draw base map with state borders
   var base = plot.append("g").attr("id", "basemap");
   var path = d3.geoPath(projection);
-
 
   // draw interior and exterior borders differently
   // https://github.com/topojson/topojson-client/blob/master/README.md#mesh
@@ -429,10 +443,26 @@ function drawMap(error, map) {
       .attr("class", "border exterior")
       .attr("d", path);
 
+
+    
   // trigger data drawing
    drawData(byiata.values(), routes);
+
+   
+   $('#reset').on("click", function(d) {
+    
+    removed_nodes.forEach(function (element){
+      console.log("ELEMENT "+ element);
+      element.style.display = "block";
+    })
+
+    });
+
 }
-  
+
+
+
+var removed_nodes =[];
 /*
  * draw airports and flights using edge bundling
  */
@@ -456,7 +486,15 @@ function drawData(airports, flights) {
     .style("fill", "none")
     .style("stroke", "#74a6f7")
     .style("stroke-width", 0.8)
-    .style("stroke-opacity", 0.5);
+    .style("stroke-opacity", 0.5)
+    .on("click", function() {
+      removed_nodes.push(this);
+      this.style.display = "none";
+      console.log("CLICK");
+    });
+
+
+
 
   // https://github.com/d3/d3-force
   var layout = d3.forceSimulation()
@@ -508,17 +546,10 @@ function drawData(airports, flights) {
         })
     .on("mouseout",  function(d,i) {tooltip.classed("hidden", true); })
     .style("stroke", "#252525")
+
+   
+    
 }
-
-
-
-
-
-
-
-
-
-
 
 
 /*
