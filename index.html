@@ -74,9 +74,12 @@ text {
     <script src="https://d3-geomap.github.io//d3-geomap/js/d3.geomap.min.js"></script>
 </head>
 <body >
+    <h3>Visualizing Graphs - Flights from Denmark</h3>
     <div>
-    <button id="bad">BAD</button>
-    <button id="good">GOOD</button>
+	<div> Click the first button to see the initial visualisation, with scalability issues. </div>
+	<div> Click the second button to see the improved version of the visualisation solving the scalability issues. </div> 
+    <button id="bad">First version </button>
+    <button id="good">Improved version</button>
   </div>
   <div id="mapid" style="display: none"></div>
 <svg width="960" height="800"></svg>
@@ -362,9 +365,6 @@ var routes = [];
 
           });
         });
-
-    airports = airports.filter(a => +a.degree !== 0);
-	
 
     var bydegree = function(a, b) {
       return d3.descending(a.degree, b.degree);
